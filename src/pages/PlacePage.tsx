@@ -101,8 +101,7 @@ export function PlacePage() {
       <div className="container place-content-grid">
         <div className="place-content-main">
           <section className="content-card">
-            <span className="eyebrow">Ce que propose cette Escale</span>
-            <h2>Modalités d’accueil</h2>
+            <h2>Services et accueil</h2>
             {place.amenities.length > 0 ? (
               <div className="amenities-grid">
                 {place.amenities.map((amenity) => (
@@ -119,8 +118,7 @@ export function PlacePage() {
           </section>
 
           <section className="content-card">
-            <span className="eyebrow">Informations récentes</span>
-            <h2>Actualités de l’Escale</h2>
+            <h2>Informations récentes</h2>
             {place.posts.length > 0 ? (
               <div className="posts-list">
                 {place.posts.map((post) => (

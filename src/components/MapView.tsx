@@ -16,24 +16,37 @@ const statusClass = (status: Place['status']) => `map-marker map-marker--${statu
 export function MapView({ places, selectedId, center, userPosition, onSelect }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
-  const markersRef = useRef<Marker[]>([])
+  const markersRef = useRef<Map<string, Marker>>(new Map())
+  const markerElementsRef = useRef<Map<string, HTMLButtonElement>>(new Map())
   const userMarkerRef = useRef<Marker | null>(null)
   const didFitRef = useRef(false)
+  const onSelectRef = useRef(onSelect)
+
+  useEffect(() => {
+    onSelectRef.current = onSelect
+  }, [onSelect])
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
 
-    mapRef.current = new maplibregl.Map({
+    const map = new maplibregl.Map({
       container: containerRef.current,
       style: 'https://tiles.openfreemap.org/styles/positron',
       center: [-1.5536, 47.2184],
       zoom: 11.2,
       attributionControl: {},
     })
-    mapRef.current.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
+
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
+    mapRef.current = map
 
     return () => {
-      mapRef.current?.remove()
+      markersRef.current.forEach((marker) => marker.remove())
+      markersRef.current.clear()
+      markerElementsRef.current.clear()
+      userMarkerRef.current?.remove()
+      userMarkerRef.current = null
+      map.remove()
       mapRef.current = null
     }
   }, [])
@@ -42,18 +55,40 @@ export function MapView({ places, selectedId, center, userPosition, onSelect }: 
     const map = mapRef.current
     if (!map) return
 
-    markersRef.current.forEach((marker) => marker.remove())
-    markersRef.current = places.map((place) => {
+    const nextIds = new Set(places.map((place) => place.id))
+
+    markersRef.current.forEach((marker, id) => {
+      if (!nextIds.has(id)) {
+        marker.remove()
+        markersRef.current.delete(id)
+        markerElementsRef.current.delete(id)
+      }
+    })
+
+    places.forEach((place) => {
+      const existingMarker = markersRef.current.get(place.id)
+      const existingElement = markerElementsRef.current.get(place.id)
+
+      if (existingMarker && existingElement) {
+        existingMarker.setLngLat([place.longitude, place.latitude])
+        existingElement.className = `${statusClass(place.status)}${selectedId === place.id ? ' map-marker--selected' : ''}`
+        existingElement.setAttribute('aria-label', `Voir ${place.name}`)
+        return
+      }
+
       const button = document.createElement('button')
       button.type = 'button'
-      button.className = `${statusClass(place.status)} ${selectedId === place.id ? 'map-marker--selected' : ''}`
+      button.className = `${statusClass(place.status)}${selectedId === place.id ? ' map-marker--selected' : ''}`
       button.setAttribute('aria-label', `Voir ${place.name}`)
       button.innerHTML = '<span class="map-marker__dot"></span>'
-      button.addEventListener('click', () => onSelect(place))
+      button.addEventListener('click', () => onSelectRef.current(place))
 
-      return new maplibregl.Marker({ element: button, anchor: 'bottom' })
+      const marker = new maplibregl.Marker({ element: button, anchor: 'bottom' })
         .setLngLat([place.longitude, place.latitude])
         .addTo(map)
+
+      markersRef.current.set(place.id, marker)
+      markerElementsRef.current.set(place.id, button)
     })
 
     if (!didFitRef.current && places.length > 1) {
@@ -62,12 +97,18 @@ export function MapView({ places, selectedId, center, userPosition, onSelect }: 
       map.fitBounds(bounds, { padding: 72, maxZoom: 13, duration: 0 })
       didFitRef.current = true
     }
-  }, [places, selectedId, onSelect])
+  }, [places])
+
+  useEffect(() => {
+    markerElementsRef.current.forEach((element, id) => {
+      element.classList.toggle('map-marker--selected', id === selectedId)
+    })
+  }, [selectedId])
 
   useEffect(() => {
     const map = mapRef.current
     if (!map || !center) return
-    map.flyTo({ center: [center.longitude, center.latitude], zoom: 13.5, duration: 900 })
+    map.flyTo({ center: [center.longitude, center.latitude], zoom: 13.5, duration: 700 })
   }, [center])
 
   useEffect(() => {

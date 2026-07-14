@@ -1,4 +1,4 @@
-import { AlertTriangle, Filter, MapPin, Plus, SlidersHorizontal } from 'lucide-react'
+import { AlertTriangle, Filter, Plus, SlidersHorizontal } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AddressSearch } from '../components/AddressSearch'
@@ -95,32 +95,24 @@ export function HomePage() {
 
   return (
     <>
-      <section className="hero">
-        <div className="hero__sun" aria-hidden="true">
-          <span /><span /><span />
-        </div>
-        <div className="container hero__content">
-          <div className="hero__copy">
-            <span className="eyebrow">Un refuge contre les fortes chaleurs</span>
-            <h1>Trouvez une <span>Escale Fraîcheur</span> près de vous</h1>
-            <p>
-              Repérez rapidement un lieu accueillant, consultez ses horaires et ses modalités d’accueil, puis obtenez votre itinéraire.
-            </p>
+      <section className="home-intro">
+        <div className="container home-intro__inner">
+          <div className="home-intro__copy">
+            <h1>Trouver une Escale Fraîcheur</h1>
+            <p>Des lieux accessibles pour se mettre au frais, s’asseoir ou boire de l’eau pendant les fortes chaleurs.</p>
           </div>
-          <div className="hero__search-panel">
+          <div className="home-intro__search">
             <AddressSearch onSelect={handleAddress} onLocate={locate} locating={locating} />
             {locationError && <p className="field-error">{locationError}</p>}
-            <p className="hero__hint"><MapPin size={16} /> Aucun compte nécessaire pour consulter la carte.</p>
           </div>
         </div>
       </section>
 
       <main className="container map-section" id="carte">
         <div className="map-section__heading">
-          <div>
-            <span className="eyebrow">Carte collaborative</span>
-            <h2>Les Escales disponibles</h2>
-            <p>{filteredPlaces.length} lieu{filteredPlaces.length > 1 ? 'x' : ''} affiché{filteredPlaces.length > 1 ? 's' : ''}</p>
+          <div className="map-section__title">
+            <h2>Les Escales sur la carte</h2>
+            <span>{filteredPlaces.length} lieu{filteredPlaces.length > 1 ? 'x' : ''}</span>
           </div>
           <button className="button button--secondary" type="button" onClick={() => setFiltersOpen((value) => !value)}>
             <SlidersHorizontal size={18} /> Filtres {activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}
@@ -161,7 +153,7 @@ export function HomePage() {
             </div>
             {activeFilterCount > 0 && (
               <button type="button" className="text-button" onClick={() => { setSelectedAmenities([]); setSelectedStatuses([]) }}>
-                Réinitialiser les filtres
+                Réinitialiser
               </button>
             )}
           </div>
@@ -187,8 +179,8 @@ export function HomePage() {
             {loading && <Loader label="Chargement des Escales…" />}
             {!loading && filteredPlaces.length === 0 && (
               <div className="empty-state">
-                <h3>Aucune Escale ne correspond à ces filtres</h3>
-                <p>Élargissez vos critères ou signalez un lieu manquant.</p>
+                <h3>Aucune Escale trouvée</h3>
+                <p>Modifiez vos filtres ou signalez un lieu manquant.</p>
                 <Link className="button button--primary" to="/signaler"><Plus size={18} /> Signaler un lieu</Link>
               </div>
             )}
@@ -202,18 +194,15 @@ export function HomePage() {
             ))}
           </section>
         </div>
-      </main>
 
-      <section className="community-cta">
-        <div className="container community-cta__inner">
+        <div className="contribute-strip">
           <div>
-            <span className="eyebrow">La carte est collaborative</span>
-            <h2>Vous connaissez une Escale qui manque ?</h2>
-            <p>Signalez-la en quelques instants, sans créer de compte. Elle sera vérifiée avant sa publication.</p>
+            <strong>Une Escale manque sur la carte ?</strong>
+            <span>Vous pouvez la signaler sans créer de compte.</span>
           </div>
-          <Link className="button button--primary button--large" to="/signaler"><Plus size={20} /> Signaler une Escale</Link>
+          <Link className="button button--secondary" to="/signaler"><Plus size={18} /> Signaler un lieu</Link>
         </div>
-      </section>
+      </main>
     </>
   )
 }
