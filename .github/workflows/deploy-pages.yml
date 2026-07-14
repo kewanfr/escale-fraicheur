@@ -24,11 +24,19 @@ jobs:
       - name: Installer Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '22.23.1'
           cache: npm
 
+      - name: Installer une version récente de npm
+        run: npm install -g npm@12.0.1
+
+      - name: Vérifier les versions
+        run: |
+          node --version
+          npm --version
+
       - name: Installer les dépendances
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       - name: Déterminer le chemin de base GitHub Pages
         id: base
