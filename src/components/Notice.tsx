@@ -1,0 +1,5 @@
+import type { ReactNode } from 'react'
+
+export function Notice({ children, tone = 'info' }: { children: ReactNode; tone?: 'info' | 'success' | 'warning' | 'error' }) {
+  return <div className={`notice notice--${tone}`}>{children}</div>
+}

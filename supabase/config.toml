@@ -1,0 +1,4 @@
+project_id = "escale-fraicheur-mvp"
+
+[functions.public-submission]
+verify_jwt = false
