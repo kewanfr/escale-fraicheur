@@ -83,8 +83,11 @@ export function MapView({ places, selectedId, center, userPosition, onSelect }: 
       button.innerHTML = '<span class="map-marker__dot"></span>'
       button.addEventListener('click', () => onSelectRef.current(place))
 
-      const marker = new maplibregl.Marker({ element: button, anchor: 'bottom' })
-        .setLngLat([place.longitude, place.latitude])
+      const marker = new maplibregl.Marker({
+        element: button,
+        anchor: 'bottom',
+        subpixelPositioning: true,
+      }).setLngLat([place.longitude, place.latitude])
         .addTo(map)
 
       markersRef.current.set(place.id, marker)
