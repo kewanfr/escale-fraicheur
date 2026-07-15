@@ -7,13 +7,13 @@ import { Brand } from './Brand'
 export function Header() {
   const [open, setOpen] = useState(false)
   const { user, profile } = useAuth()
-
   const close = () => setOpen(false)
 
   return (
     <header className="site-header">
       <div className="site-header__inner container">
         <Brand compact />
+
         <button
           className="icon-button site-header__menu"
           type="button"
@@ -21,17 +21,18 @@ export function Header() {
           aria-expanded={open}
           onClick={() => setOpen((value) => !value)}
         >
-          {open ? <X size={23} /> : <Menu size={23} />}
+          {open ? <X size={22} /> : <Menu size={22} />}
         </button>
+
         <nav className={`site-nav ${open ? 'site-nav--open' : ''}`} aria-label="Navigation principale">
-          <NavLink to="/" onClick={close}>Trouver une escale</NavLink>
+          <NavLink to="/" onClick={close}>Carte</NavLink>
           <NavLink to="/signaler" onClick={close}>Signaler un lieu</NavLink>
           {user ? (
-            <Link className="button button--small button--secondary" to="/dashboard" onClick={close}>
+            <Link className="site-nav__account" to="/dashboard" onClick={close}>
               {profile?.role === 'admin' ? 'Administration' : 'Mon espace'}
             </Link>
           ) : (
-            <Link className="button button--small button--secondary" to="/connexion" onClick={close}>
+            <Link className="site-nav__account" to="/connexion" onClick={close}>
               Espace établissement
             </Link>
           )}

@@ -13,7 +13,7 @@ import type { AddressSuggestion, Place, PlaceStatus } from '../types'
 
 const statusOptions: Array<{ value: PlaceStatus; label: string }> = [
   { value: 'open', label: 'Ouvertes' },
-  { value: 'conditional', label: 'Conditionnelles' },
+  { value: 'conditional', label: 'Selon conditions' },
   { value: 'unconfirmed', label: 'À confirmer' },
 ]
 
@@ -78,9 +78,7 @@ export function HomePage() {
   const handleSelectPlace = (place: Place) => {
     setSelectedId(place.id)
     setCenter({ latitude: place.latitude, longitude: place.longitude })
-    if (window.innerWidth < 760) {
-      navigate(`/lieu/${place.slug}`)
-    }
+    if (window.innerWidth < 760) navigate(`/lieu/${place.slug}`)
   }
 
   const toggleAmenity = (code: string) => {
@@ -98,9 +96,11 @@ export function HomePage() {
       <section className="home-intro">
         <div className="container home-intro__inner">
           <div className="home-intro__copy">
-            <h1>Trouver une Escale Fraîcheur</h1>
-            <p>Des lieux accessibles pour se mettre au frais, s’asseoir ou boire de l’eau pendant les fortes chaleurs.</p>
+            <span className="home-intro__label">Carte des Escales Fraîcheur</span>
+            <h1>Trouver un lieu frais près de vous</h1>
+            <p>Repérez rapidement un espace où vous mettre au frais, vous asseoir ou boire de l’eau pendant les fortes chaleurs.</p>
           </div>
+
           <div className="home-intro__search">
             <AddressSearch onSelect={handleAddress} onLocate={locate} locating={locating} />
             {locationError && <p className="field-error">{locationError}</p>}
@@ -109,20 +109,28 @@ export function HomePage() {
       </section>
 
       <main className="container map-section" id="carte">
-        <div className="map-section__heading">
-          <div className="map-section__title">
-            <h2>Les Escales sur la carte</h2>
-            <span>{filteredPlaces.length} lieu{filteredPlaces.length > 1 ? 'x' : ''}</span>
+        <div className="map-toolbar">
+          <div className="map-toolbar__count" aria-live="polite">
+            <strong>{filteredPlaces.length}</strong>
+            <span>Escale{filteredPlaces.length > 1 ? 's' : ''} affichée{filteredPlaces.length > 1 ? 's' : ''}</span>
           </div>
-          <button className="button button--secondary" type="button" onClick={() => setFiltersOpen((value) => !value)}>
-            <SlidersHorizontal size={18} /> Filtres {activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}
+
+          <button
+            className="button button--secondary"
+            type="button"
+            onClick={() => setFiltersOpen((value) => !value)}
+            aria-expanded={filtersOpen}
+          >
+            <SlidersHorizontal size={18} />
+            Filtres
+            {activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}
           </button>
         </div>
 
         {filtersOpen && (
           <div className="filters-panel">
             <div>
-              <h3><Filter size={18} /> Statut</h3>
+              <h2><Filter size={17} /> Disponibilité</h2>
               <div className="filter-pills">
                 {statusOptions.map((option) => (
                   <button
@@ -136,8 +144,9 @@ export function HomePage() {
                 ))}
               </div>
             </div>
+
             <div>
-              <h3>Services</h3>
+              <h2>Services</h2>
               <div className="filter-pills">
                 {AMENITIES.slice(0, 5).map((amenity) => (
                   <button
@@ -151,9 +160,10 @@ export function HomePage() {
                 ))}
               </div>
             </div>
+
             {activeFilterCount > 0 && (
               <button type="button" className="text-button" onClick={() => { setSelectedAmenities([]); setSelectedStatuses([]) }}>
-                Réinitialiser
+                Tout effacer
               </button>
             )}
           </div>
@@ -175,15 +185,23 @@ export function HomePage() {
               />
             )}
           </section>
-          <section className="map-layout__list" aria-label="Liste des lieux">
+
+          <aside className="map-layout__list" aria-label="Liste des lieux">
+            <div className="map-list__heading">
+              <strong>{userPosition ? 'Les plus proches' : 'Les lieux disponibles'}</strong>
+              <span>{userPosition ? 'classés par distance' : 'sélectionnez un lieu sur la carte'}</span>
+            </div>
+
             {loading && <Loader label="Chargement des Escales…" />}
+
             {!loading && filteredPlaces.length === 0 && (
               <div className="empty-state">
                 <h3>Aucune Escale trouvée</h3>
-                <p>Modifiez vos filtres ou signalez un lieu manquant.</p>
+                <p>Essayez d’élargir vos critères ou signalez un lieu manquant.</p>
                 <Link className="button button--primary" to="/signaler"><Plus size={18} /> Signaler un lieu</Link>
               </div>
             )}
+
             {!loading && filteredPlaces.map((place) => (
               <PlaceCard
                 key={place.id}
@@ -192,15 +210,12 @@ export function HomePage() {
                 onHover={() => setSelectedId(place.id)}
               />
             ))}
-          </section>
+          </aside>
         </div>
 
         <div className="contribute-strip">
-          <div>
-            <strong>Une Escale manque sur la carte ?</strong>
-            <span>Vous pouvez la signaler sans créer de compte.</span>
-          </div>
-          <Link className="button button--secondary" to="/signaler"><Plus size={18} /> Signaler un lieu</Link>
+          <p><strong>Un lieu manque sur la carte ?</strong> Signalez-le en quelques minutes, sans créer de compte.</p>
+          <Link className="text-link" to="/signaler"><Plus size={17} /> Signaler un lieu</Link>
         </div>
       </main>
     </>

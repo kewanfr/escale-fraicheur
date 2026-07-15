@@ -36,13 +36,8 @@ export function PlacePage() {
       .finally(() => setLoading(false))
   }, [slug])
 
-  if (loading) {
-    return <main className="container page-shell"><Loader label="Chargement de l’Escale…" /></main>
-  }
-
-  if (error) {
-    return <main className="container page-shell"><Notice tone="error">{error}</Notice></main>
-  }
+  if (loading) return <main className="container page-shell"><Loader label="Chargement de l’Escale…" /></main>
+  if (error) return <main className="container page-shell"><Notice tone="error">{error}</Notice></main>
 
   if (!place) {
     return (
@@ -64,7 +59,7 @@ export function PlacePage() {
   return (
     <main className="place-page">
       <div className="container place-page__back">
-        <Link className="text-link" to="/"><ArrowLeft size={18} /> Retour à la carte</Link>
+        <Link className="text-link" to="/"><ArrowLeft size={17} /> Retour à la carte</Link>
       </div>
 
       <section className="container place-hero">
@@ -72,41 +67,54 @@ export function PlacePage() {
           <div className="place-hero__badges">
             <StatusBadge status={place.status} />
             {place.verificationStatus === 'verified' && (
-              <span className="verified-label verified-label--large"><ShieldCheck size={17} /> Établissement vérifié</span>
+              <span className="verified-label verified-label--large"><ShieldCheck size={16} /> Établissement vérifié</span>
             )}
           </div>
+
           <h1>{place.name}</h1>
-          <p className="place-hero__address"><MapPin size={20} /> {place.address}, {place.postalCode} {place.city}</p>
+          <p className="place-hero__address"><MapPin size={19} /> {place.address}, {place.postalCode} {place.city}</p>
+
           <div className="place-hero__today">
-            <CalendarClock size={21} />
+            <CalendarClock size={20} />
             <div>
-              <span>Horaires aujourd’hui</span>
+              <span>Aujourd’hui</span>
               <strong>{todayOpening(place)}</strong>
             </div>
           </div>
+
           <div className="place-hero__actions">
             <a className="button button--primary" href={osmDirections} target="_blank" rel="noreferrer">
-              <Navigation size={19} /> Itinéraire <ExternalLink size={15} />
+              <Navigation size={18} /> Itinéraire <ExternalLink size={14} />
             </a>
             <Link className="button button--secondary" to={`/signaler?kind=correction&place=${encodeURIComponent(place.slug)}`}>
-              <Flag size={18} /> Signaler une erreur
+              <Flag size={17} /> Signaler une erreur
             </Link>
           </div>
         </div>
+
         <div className="place-hero__map">
-          <MapView places={[place]} selectedId={place.id} center={{ latitude: place.latitude, longitude: place.longitude }} onSelect={() => undefined} />
+          <MapView
+            places={[place]}
+            selectedId={place.id}
+            center={{ latitude: place.latitude, longitude: place.longitude }}
+            onSelect={() => undefined}
+          />
         </div>
       </section>
 
       <div className="container place-content-grid">
         <div className="place-content-main">
-          <section className="content-card">
-            <h2>Services et accueil</h2>
+          <section className="content-card content-card--services">
+            <div className="section-heading">
+              <h2>Ce que vous trouverez sur place</h2>
+              <p>Les services indiqués pour cette Escale.</p>
+            </div>
+
             {place.amenities.length > 0 ? (
               <div className="amenities-grid">
                 {place.amenities.map((amenity) => (
                   <div className="amenity-card" key={amenity.code}>
-                    <span className="amenity-card__icon"><AmenityIcon name={amenity.icon} size={28} /></span>
+                    <span className="amenity-card__icon"><AmenityIcon name={amenity.icon} size={24} /></span>
                     <strong>{amenity.label}</strong>
                   </div>
                 ))}
@@ -114,16 +122,21 @@ export function PlacePage() {
             ) : (
               <p>Les modalités détaillées n’ont pas encore été renseignées.</p>
             )}
+
             {place.description && <p className="place-description">{place.description}</p>}
           </section>
 
           <section className="content-card">
-            <h2>Informations récentes</h2>
+            <div className="section-heading">
+              <h2>Informations récentes</h2>
+              <p>Les dernières nouvelles publiées par le lieu.</p>
+            </div>
+
             {place.posts.length > 0 ? (
               <div className="posts-list">
                 {place.posts.map((post) => (
                   <article className="post-card" key={post.id}>
-                    <div className="post-card__icon"><CircleAlert size={20} /></div>
+                    <div className="post-card__icon"><CircleAlert size={19} /></div>
                     <div>
                       {post.title && <h3>{post.title}</h3>}
                       <p>{post.body}</p>
@@ -133,7 +146,7 @@ export function PlacePage() {
                 ))}
               </div>
             ) : (
-              <div className="quiet-state"><CheckCircle2 size={22} /><span>Aucune information temporaire signalée.</span></div>
+              <div className="quiet-state"><CheckCircle2 size={20} /><span>Aucune information temporaire signalée.</span></div>
             )}
           </section>
         </div>
@@ -145,17 +158,17 @@ export function PlacePage() {
               {groupedPeriods.map(({ label, periods }) => (
                 <div className="hours-row" key={label}>
                   <span>{label}</span>
-                  <strong>{periods.length ? periods.map((period) => `${period.opens.slice(0, 5)} – ${period.closes.slice(0, 5)}`).join(', ') : 'Fermé / non renseigné'}</strong>
+                  <strong>{periods.length ? periods.map((period) => `${period.opens.slice(0, 5)} – ${period.closes.slice(0, 5)}`).join(', ') : 'Non renseigné'}</strong>
                 </div>
               ))}
             </div>
-            <small className="muted">Dernière mise à jour {formatRelativeDate(place.updatedAt)}.</small>
+            <small className="muted">Mise à jour {formatRelativeDate(place.updatedAt)}.</small>
           </section>
 
           <section className="content-card claim-card">
             <h2>Vous représentez ce lieu ?</h2>
-            <p>Revendiquer la fiche permet de gérer les informations et de publier des actualités.</p>
-            <Link className="button button--secondary button--full" to={`/revendiquer/${place.slug}`}>Revendiquer cette Escale</Link>
+            <p>Vous pouvez revendiquer la fiche pour modifier les informations et publier des actualités.</p>
+            <Link className="text-link" to={`/revendiquer/${place.slug}`}>Revendiquer cette Escale</Link>
           </section>
         </aside>
       </div>
